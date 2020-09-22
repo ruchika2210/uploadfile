@@ -2,6 +2,8 @@ const express=require('express')
 const multer=require('multer')
 const ejs=require('ejs')
 const path=require('path')
+const nodemailer=require('nodemailer')
+const bodyparser=require('body-parser')
 
 //set storage engine
 const storage=multer.diskStorage({
@@ -10,6 +12,13 @@ const storage=multer.diskStorage({
         cb(null,file.fieldname + '-' + Date.now() + path.extname(file.originalname))
     }
 })
+
+//Init app
+const app=express()
+
+//bodyparser
+app.use(express.urlencoded())
+app.use(bodyparser.json())
 
 //init upload
 const upload=multer({
@@ -38,8 +47,7 @@ function checkFileType(file,cb){
     }
 }
 
-//Init app
-const app=express()
+
 
 //set up ejs
 app.set('view engine','ejs')
@@ -47,11 +55,13 @@ app.set('view engine','ejs')
 //public Folder
 app.use(express.static('./public'))
 
+
 app.get('/',(req,res) =>{
     res.render('index')
 })
 
 app.post('/upload',(req,res) =>{
+
     upload(req,res,(err)=>{
         if(err){
             res.render('index',{
@@ -68,12 +78,28 @@ app.post('/upload',(req,res) =>{
         else{
             res.render('index',{
                 msg:'File Uploaded',
-                file:`uploads/${req.file.filename}`
-            })
+                file:`uploads/${req.file.filename}`,
+                
+
+                output:{
+                    firstname:req.body.firstname,
+                    
+                }
+            
+                
+           })
         }
     }
     })
-})
+
+    
+    
+
+ })
+
+ app.post('/download',(req,res) =>{
+     const {name}=req.body
+ })
 
 
 const Port=process.env.PORT |3000
